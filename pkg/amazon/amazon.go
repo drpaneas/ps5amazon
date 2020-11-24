@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/drpaneas/ps5amazon/pkg/util"
@@ -15,6 +16,8 @@ var gatewayTimeout bool = false
 
 // getAmazonHTML returns the HTML body for a given webpage
 func getAmazonHTML(page string) (doc *goquery.Document) {
+
+	client := &http.Client{Timeout: 5 * time.Second}
 
 	// Request the HTML page.
 	req, err := http.NewRequest("GET", amazonURL, nil)
@@ -39,21 +42,16 @@ func getAmazonHTML(page string) (doc *goquery.Document) {
 	req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36")
 
 	// Send the HTTP Request and receive the HTTP Response
-	res, err := http.DefaultClient.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode == 504 {
+	if res.StatusCode != 200 {
 		gatewayTimeout = true
 		log.Printf("status code error: %d %s", res.StatusCode, res.Status)
 		return doc
-	}
-
-	// Check for HTTP status code
-	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
 
 	// Load the HTML <body>

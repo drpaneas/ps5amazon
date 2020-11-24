@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/drpaneas/ps5amazon/pkg/util"
@@ -15,7 +16,9 @@ var gatewayTimeout bool = false
 
 func getHTML(page string) (doc *goquery.Document) {
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
 
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
@@ -35,14 +38,10 @@ func getHTML(page string) (doc *goquery.Document) {
 
 	defer res.Body.Close()
 
-	if res.StatusCode == 504 {
+	if res.StatusCode != 200 {
 		gatewayTimeout = true
 		log.Printf("status code error: %d %s", res.StatusCode, res.Status)
 		return doc
-	}
-
-	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
 
 	// Load the HTML document
