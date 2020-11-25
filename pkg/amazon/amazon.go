@@ -22,7 +22,8 @@ func getAmazonHTML(page string) (doc *goquery.Document) {
 	// Request the HTML page.
 	req, err := http.NewRequest("GET", amazonURL, nil)
 	if err != nil {
-		log.Fatal(err)
+		gatewayTimeout = true
+		return doc
 	}
 
 	// Inject the headers (stripped from Chrome > Developer Tools > Network tab) into the HTTP Request
@@ -44,7 +45,8 @@ func getAmazonHTML(page string) (doc *goquery.Document) {
 	// Send the HTTP Request and receive the HTTP Response
 	res, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		gatewayTimeout = true
+		return doc
 	}
 	defer res.Body.Close()
 
@@ -57,7 +59,8 @@ func getAmazonHTML(page string) (doc *goquery.Document) {
 	// Load the HTML <body>
 	doc, err = goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		gatewayTimeout = true
+		return doc
 	}
 
 	return doc

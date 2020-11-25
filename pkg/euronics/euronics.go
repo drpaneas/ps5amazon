@@ -33,7 +33,8 @@ func getHTML(page string) (doc *goquery.Document) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		gatewayTimeout = true
+		return doc
 	}
 
 	defer res.Body.Close()
@@ -47,7 +48,8 @@ func getHTML(page string) (doc *goquery.Document) {
 	// Load the HTML document
 	doc, err = goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		gatewayTimeout = true
+		return doc
 	}
 	return doc
 }
